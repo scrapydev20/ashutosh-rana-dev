@@ -12,9 +12,11 @@ marked.setOptions({
 export interface Post {
   slug: string
   title: string
+  /** ISO 8601, with time and offset when given, e.g. "2026-11-23T21:44:00-05:00". */
   date: string
-  readTime: string
-  category: 'rust' | 'blockchain' | 'personal'
+  series?: string
+  /** Meta description; falls back to the excerpt. */
+  description: string
   tags: string[]
   excerpt: string
   content: string
@@ -39,16 +41,18 @@ export function getAllPosts(): Post[] {
         return {
           slug: data.slug || fileName.replace(/\.md$/, ''),
           title: data.title || '',
-          date: data.date instanceof Date ? data.date.toISOString().split('T')[0] : (data.date || ''),
-          readTime: data.readTime || '5 min',
-          category: (data.category || 'personal') as 'rust' | 'blockchain' | 'personal',
+          // Quote dates in front matter to keep the original offset; unquoted
+          // YAML timestamps arrive as Date objects and are normalized to UTC.
+          date: data.date instanceof Date ? data.date.toISOString() : String(data.date || ''),
+          series: data.series || undefined,
+          description: data.description || data.excerpt || '',
           tags: data.tags || [],
           excerpt: data.excerpt || '',
           content: content,
           html: html,
         } as Post
       })
-      .sort((a, b) => (a.date < b.date ? 1 : -1))
+      .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
 
     return posts
   } catch (error) {

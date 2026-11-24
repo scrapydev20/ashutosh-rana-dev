@@ -1,22 +1,14 @@
 # Ashutosh Rana - Personal Site
 
-A retro-CRT terminal personal site built with Next.js, TypeScript, and Tailwind CSS.
-Two streams of signal, nothing else:
+A minimal digital garden built with Next.js, TypeScript, and Tailwind CSS, designed for
+long-form reading.
 
-- **Rust Bytes**: bite-sized snippets and concepts from the Rust handbook.
-- **Corporate Log**: pragmatic lessons from 4 years of corporate software engineering.
+## Design
 
-## Aesthetic
-
-Pure-black background with an emerald-green phosphor hierarchy, three stacked CRT
-overlays (radial blueprint grid, scanlines, fractal-noise grain), monospace type,
-wide `tracking-widest` readouts, and a glitch effect on the brand name.
-
-## Tech Stack
-
-- **Framework:** Next.js 14 (static export)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
+- Soft dark mode: `slate-950` background, `slate-200` text, one muted sky accent for links.
+- Inter for all headings and body copy. Monospace only for inline code and `<pre>` blocks.
+- A single centered column (`max-w-2xl`, about 672px) holding a flat vertical feed.
+- Post bodies use the custom `prose-garden` typography theme in `tailwind.config.ts`.
 
 ## Getting Started
 
@@ -30,31 +22,35 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Project Structure
 
 ```
-├── app/
-│   ├── layout.tsx          # Root layout + metadata
-│   ├── page.tsx            # Renders HomeClient
-│   ├── HomeClient.tsx      # Hash-routed SPA shell (hero + feed + about)
-│   ├── not-found.tsx       # Terminal 404
-│   └── globals.css         # Base styles + glitch keyframes
-├── components/
-│   ├── Hero.tsx            # Terminal welcome screen
-│   ├── Feed.tsx            # Dual-feed layout + filter tabs + empty states
-│   ├── RustByteCard.tsx    # Terminal-framed code-snippet card
-│   ├── CorporateLogCard.tsx# Text log entry with "lesson" callout
-│   ├── RustCode.tsx        # Dependency-free Rust syntax highlighter
-│   └── ...                 # CRT overlays, Nav, Footer, primitives
-├── data/
-│   ├── siteData.ts         # Profile + socials
-│   ├── bytes.ts            # Rust Bytes entries
-│   └── logs.ts             # Corporate Log entries
-└── archive/                # Previous "ScrapyChain" version (not imported)
+app/
+  layout.tsx            Root layout: font, header, reading column, footer
+  page.tsx              Homepage: intro, writing feed, projects
+  posts/[slug]/page.tsx Individual post page
+  not-found.tsx         404
+  globals.css           Base styles
+content/posts/          Markdown posts
+data/
+  siteData.ts           Profile and social links
+  projects.ts           Project list
+lib/posts.ts            Markdown loading (gray-matter + marked)
 ```
 
-## Adding Content
+## Writing a Post
 
-- **Rust Byte:** append a `RustByte` object to `bytes` in `data/bytes.ts`.
-- **Corporate Log entry:** append a `CorporateLog` object to `logs` in `data/logs.ts`.
-- **Blank slate:** empty either array, and the feed renders a graceful empty state.
+Add a markdown file to `content/posts/`:
+
+```markdown
+---
+title: My first note
+date: 2026-11-21
+excerpt: One sentence shown on the homepage.
+tags: [rust]
+---
+
+Post body in markdown.
+```
+
+The slug comes from the filename, or from a `slug` field in the frontmatter if one is set.
 
 ## Build
 
