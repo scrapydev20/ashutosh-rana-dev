@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import TopicLinks from '@/components/TopicLinks'
 import { getAllPosts, getPostBySlug } from '@/lib/posts'
 import { formatDateTime } from '@/lib/utils'
 
@@ -25,6 +26,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
       description: post.description,
       type: 'article',
       publishedTime: post.date,
+      tags: post.topics,
     },
   }
 }
@@ -35,17 +37,25 @@ export default function PostPage({ params }: { params: { slug: string } }) {
 
   return (
     <article>
-      <header className="mb-10">
-        {post.series && <p className="text-sm font-medium text-sky-300/80">{post.series}</p>}
-        <h1 className="mt-2 text-3xl font-bold leading-tight tracking-tight text-slate-50 sm:text-4xl">
+      <header className="border-b border-trail pb-6 pt-6">
+        {post.series && (
+          <p className="text-sm font-medium uppercase tracking-wide text-accent">{post.series}</p>
+        )}
+        <h1 className="mt-2 text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
           {post.title}
         </h1>
-        <time dateTime={post.date} className="mt-3 block text-sm text-slate-500">
+        <time dateTime={post.date} className="mt-3 block text-sm text-muted">
           {formatDateTime(post.date)}
         </time>
+        {post.topics.length > 0 && (
+          <nav aria-label="Topics for this post" className="mt-3 text-sm">
+            <TopicLinks topics={post.topics} className="gap-x-4" />
+          </nav>
+        )}
       </header>
+
       <div
-        className="prose prose-garden prose-lg"
+        className="prose prose-site prose-lg pt-8"
         dangerouslySetInnerHTML={{ __html: post.html }}
       />
     </article>

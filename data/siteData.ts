@@ -10,6 +10,6 @@ export const profile = {
 } as const
 
 export const socials = {
-  github: { label: 'GitHub', href: 'https://github.com/scrapychain' },
+  github: { label: 'GitHub', href: 'https://github.com/scrapydev20/' },
   x: { label: 'X', href: 'https://x.com/ashutoshrana_20' },
 } as const
