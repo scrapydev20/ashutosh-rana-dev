@@ -2,20 +2,85 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Palette taken from the night-road images. Every text color passes WCAG AA
+   (4.5:1) on bg, surface and code-bg in both modes. Values are RGB channels. */
 @layer base {
-  html {
-    @apply bg-slate-950;
+  :root {
+    color-scheme: light;
+    --bg: 248 249 251;        /* #f8f9fb */
+    --surface: 238 241 246;   /* #eef1f6 */
+    --border: 211 218 229;    /* #d3dae5 */
+    --fg: 15 26 43;           /* #0f1a2b */
+    --muted: 75 85 103;       /* #4b5567 */
+    --accent: 179 33 63;      /* #b3213f crimson */
+    --link: 15 106 112;       /* #0f6a70 teal */
+    --code-bg: 238 241 246;   /* #eef1f6 */
+    --code-fg: 27 36 54;      /* #1b2436 */
+
+    --hl-keyword: #b3213f;
+    --hl-string: #0f6a70;
+    --hl-number: #8a5300;
+    --hl-comment: #4b5567;
+    --hl-title: #3049b8;
+    --hl-type: #8a2a55;
+
+    --trail-alpha: 0.45;
+    --glow-alpha: 0.1;
+  }
+
+  html.dark {
     color-scheme: dark;
-    scroll-behavior: smooth;
+    --bg: 11 15 29;           /* #0b0f1d */
+    --surface: 18 26 44;      /* #121a2c */
+    --border: 34 52 74;       /* #22344a */
+    --fg: 230 232 239;        /* #e6e8ef */
+    --muted: 154 166 184;     /* #9aa6b8 */
+    --accent: 240 86 110;     /* #f0566e */
+    --link: 79 193 198;       /* #4fc1c6 */
+    --code-bg: 15 22 38;      /* #0f1626 */
+    --code-fg: 219 226 236;   /* #dbe2ec */
+
+    --hl-keyword: #f0566e;
+    --hl-string: #4fc1c6;
+    --hl-number: #e0b872;
+    --hl-comment: #8b97aa;
+    --hl-title: #a5b8ff;
+    --hl-type: #e6a0b8;
+
+    --trail-alpha: 0.6;
+    --glow-alpha: 0.22;
+  }
+
+  html {
+    @apply bg-bg;
+  }
+
+  /* Starfield, dark mode only: sparse static dots tiled at prime-ish sizes so
+     the repeat isn't obvious. The reading column covers it (see .column), so
+     stars only show in the side margins, never behind text. */
+  html.dark {
+    background-image:
+      radial-gradient(1.5px 1.5px at 37px 61px, rgb(230 232 239 / 0.7), transparent 70%),
+      radial-gradient(1px 1px at 141px 23px, rgb(230 232 239 / 0.5), transparent 70%),
+      radial-gradient(1px 1px at 211px 173px, rgb(79 193 198 / 0.6), transparent 70%),
+      radial-gradient(1px 1px at 89px 211px, rgb(230 232 239 / 0.4), transparent 70%),
+      radial-gradient(1.5px 1.5px at 269px 97px, rgb(240 86 110 / 0.55), transparent 70%),
+      radial-gradient(1px 1px at 313px 331px, rgb(230 232 239 / 0.45), transparent 70%),
+      radial-gradient(1px 1px at 59px 389px, rgb(79 193 198 / 0.45), transparent 70%),
+      radial-gradient(2px 2px at 401px 263px, rgb(230 232 239 / 0.6), transparent 70%);
+    background-size: 241px 241px, 307px 307px, 263px 263px, 211px 211px, 433px 433px,
+      379px 379px, 457px 457px, 521px 521px;
   }
 
   body {
-    @apply bg-slate-950 font-sans text-slate-200 antialiased;
-    font-feature-settings: 'cv11', 'ss01';
-    text-rendering: optimizeLegibility;
+    @apply font-sans text-fg antialiased;
+    line-height: 1.7;
+    /* The homepage glow is wider than the column; clip it without making
+       the page scroll sideways. */
+    overflow-x: clip;
   }
 
-  /* Monospace is reserved for code only. */
+  /* Monospace is reserved for code. */
   code,
   kbd,
   samp,
@@ -24,24 +89,111 @@
   }
 
   pre {
-    @apply overflow-x-auto text-sm leading-relaxed;
+    @apply overflow-x-auto text-sm;
   }
 
-  a {
-    @apply transition-colors;
+  img,
+  svg,
+  video {
+    max-width: 100%;
+    height: auto;
   }
 
   :focus-visible {
-    @apply rounded-sm outline outline-2 outline-offset-2 outline-sky-400;
+    outline: 2px solid rgb(var(--link));
+    outline-offset: 3px;
+    border-radius: 2px;
   }
 
   ::selection {
-    @apply bg-sky-400/25 text-slate-50;
+    background: rgb(var(--link) / 0.25);
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
+@layer components {
+  /* Reading column: a solid background with a feathered edge, so the
+     starfield fades out before it reaches the text. */
+  .column {
+    background-color: rgb(var(--bg));
+    box-shadow: 0 0 48px 32px rgb(var(--bg));
   }
+
+  /* Light-trail divider: crimson fading in from the left, teal from the right,
+     transparent in the middle (a direct crimson-to-teal blend turns grey).
+     Use with border-t / border-b / border-y. */
+  .border-trail {
+    border-image: linear-gradient(
+        90deg,
+        transparent,
+        rgb(var(--accent) / var(--trail-alpha)) 18%,
+        transparent 50%,
+        rgb(var(--link) / var(--trail-alpha)) 82%,
+        transparent
+      )
+      1;
+  }
+
+  /* Nebula glow behind the homepage title. */
+  .nebula {
+    position: absolute;
+    left: 50%;
+    /* Ends around the topic row, so post titles sit on the plain background. */
+    top: -30px;
+    width: 900px;
+    height: 230px;
+    transform: translateX(-50%);
+    pointer-events: none;
+    background:
+      radial-gradient(closest-side at 38% 50%, rgb(var(--accent) / var(--glow-alpha)), transparent),
+      radial-gradient(closest-side at 64% 58%, rgb(var(--link) / var(--glow-alpha)), transparent);
+  }
+
+  /* Skip link: hidden until focused with the keyboard. */
+  .skip-link {
+    @apply sr-only;
+  }
+  .skip-link:focus {
+    @apply not-sr-only fixed left-4 top-4 z-50 rounded bg-surface px-3 py-2 text-fg;
+  }
+}
+
+/* Syntax highlighting (highlight.js classes, rendered at build time). */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in,
+.hljs-meta .hljs-keyword {
+  color: var(--hl-keyword);
+}
+.hljs-string,
+.hljs-regexp,
+.hljs-char,
+.hljs-symbol,
+.hljs-attr {
+  color: var(--hl-string);
+}
+.hljs-number,
+.hljs-literal {
+  color: var(--hl-number);
+}
+.hljs-comment,
+.hljs-quote,
+.hljs-meta {
+  color: var(--hl-comment);
+  font-style: italic;
+}
+.hljs-title,
+.hljs-title.function_,
+.hljs-section {
+  color: var(--hl-title);
+}
+.hljs-type,
+.hljs-title.class_,
+.hljs-params {
+  color: var(--hl-type);
+}
+.hljs-emphasis {
+  font-style: italic;
+}
+.hljs-strong {
+  font-weight: 600;
 }
